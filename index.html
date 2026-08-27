@@ -726,31 +726,28 @@
 <script>
 
 // - Supabase Config ----------------------------─
-const SUPA_URL = 'https://gcsspamgnnqegareyvfy.supabase.co';
-const SUPA_KEY = 'sb_publishable_F1RvlEvP3XeiDA1hIk9rWA_LiGGTrna';
+const SUPA_URL = 'https://sveuwssjjlcsgdxdekpz.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2ZXV3c3Nqamxjc2dkeGRla3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NjA2OTYsImV4cCI6MjEwMzQzNjY5Nn0.myoueJJ67jAv8zSv50IXD6t2Nxi_4KnGwHZWFJV-FVg';
 
 async function supaFetch(path, method='GET', body=null, timeoutMs=12000) {
-  const ctrl = new AbortController();
-  const timer = setTimeout(()=>ctrl.abort(), timeoutMs);
-  try {
-    const opts = {
-      method,
-      signal: ctrl.signal,
-      headers: {
-        'apikey': SUPA_KEY,
-        'Authorization': 'Bearer ' + SUPA_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      }
-    };
-    if (body) opts.body = JSON.stringify(body);
+  const opts = {
+    method,
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const doFetch = (async () => {
     const r = await fetch(SUPA_URL + path, opts);
     if (!r.ok) { const t = await r.text(); throw new Error(t); }
     const txt = await r.text();
     return txt ? JSON.parse(txt) : [];
-  } finally {
-    clearTimeout(timer);
-  }
+  })();
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado')), timeoutMs));
+  return Promise.race([doFetch, timeout]);
 }
 
 // - Sync Engine (offline-safe) ------------------
